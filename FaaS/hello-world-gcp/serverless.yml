@@ -1,0 +1,21 @@
+service: hello-world
+frameworkVersion: '2'
+
+provider:
+  name: google
+  runtime: nodejs14
+  region: asia-east2
+  project: fifth-audio-321904
+  credentials: C:/Users/kyo.cheng15/.gcloud/keyfile.json
+
+plugins:
+  - serverless-google-cloudfunctions
+functions:
+  hello:
+    handler: hello
+    memorySize: 128
+    timeout: 20s
+    events:
+      - event:
+          eventType: providers/cloud.pubsub/eventTypes/topic.publish
+          resource: 'projects/${self:provider.project, ""}/topics/cron-topic'
