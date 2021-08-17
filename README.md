@@ -1,0 +1,3 @@
+# FaaS-practice
+
+Just practice (￣▽￣)~*
