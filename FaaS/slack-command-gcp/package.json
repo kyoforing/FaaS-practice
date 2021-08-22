@@ -1,0 +1,9 @@
+{
+  "main": "./index.js",
+  "dependencies": {
+    "googleapis": "84.0.0"
+  },
+  "devDependencies": {
+    "serverless-google-cloudfunctions": "4.3.0"
+  }
+}
