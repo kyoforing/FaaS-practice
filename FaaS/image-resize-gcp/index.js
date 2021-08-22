@@ -1,30 +1,27 @@
-const AWS = require('aws-sdk');
 const Sharp = require('sharp');
-const S3 = new AWS.S3();
+const storage = require('@google-cloud/storage')();
 
-module.exports.resizeImage = async event => {
+exports.resizeImage = async event => {
     console.log(event);
 
-    const sourceBucket = event.Records[0].s3.bucket.name;
-    const sourceFileKey = decodeURIComponent(event.Records[0].s3.object.key.replace(/\+/g, " "));
+    const sourceBucket = event.bucket;
+    const sourceFileKey = event.name;
     const destinationBucket = `${sourceBucket}-resize`
     const resizeConfigs = getResizeConfigs(sourceFileKey);
+    const tempLocalPath = `/tmp/${sourceFileKey}`;
 
     ensureTypeCorrect(sourceFileKey);
 
-    const originImage = await getResource(sourceBucket, sourceFileKey);
+    await downloadResource(sourceBucket, sourceFileKey, tempLocalPath);
 
     for (let resizeConfig of resizeConfigs) {
-        const resizeImage = await Sharp(originImage.Body, { failOnError: false })
+        await Sharp(tempLocalPath, { failOnError: false })
             .resize(resizeConfig.width)
-            .toBuffer();
+            .toFile(`/tmp/${resizeConfig.resizeFileKey}`);
     
-        await S3.putObject({
-            Body: resizeImage,
-            Bucket: destinationBucket,
-            ContentType: resizeImage.ContentType,
-            Key: resizeConfig.resizeFileKey
-        }).promise();
+        await storage
+            .bucket(destinationBucket)
+            .upload(`/tmp/${resizeConfig.resizeFileKey}`, {destination: resizeConfig.resizeFileKey});
     }
 };
 
@@ -57,9 +54,9 @@ const ensureTypeCorrect = sourceFileKey => {
     } 
 };
 
-const getResource = async (bucket, fileKey) => {
-    return await S3.getObject({ 
-        Bucket: bucket, 
-        Key: fileKey  
-    }).promise();
+const downloadResource = async (bucket, fileKey, tempLocalPath) => {
+    await storage
+        .bucket(bucket)
+        .file(fileKey)
+        .download({ destination: tempLocalPath });
 };

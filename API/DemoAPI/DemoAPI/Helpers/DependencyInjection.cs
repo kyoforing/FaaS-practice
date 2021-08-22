@@ -13,6 +13,7 @@ namespace DemoAPI.Helpers
     {
         public static IServiceCollection RegisterInternalDependencies(this IServiceCollection services)
         {
+            services.AddTransient<IFileHandler, FileHandler>();
             services.AddTransient<AWSService>();
             services.AddTransient<GCPService>();
             services.AddTransient<ProviderResolver>(serviceProvider => key => GetServiceProviderDeposit(key, serviceProvider));

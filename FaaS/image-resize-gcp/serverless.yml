@@ -1,0 +1,21 @@
+service: image
+frameworkVersion: '2'
+
+provider:
+  name: google
+  runtime: nodejs14
+  region: asia-east2
+  project: fifth-audio-321904
+  credentials: C:/Users/kyo.cheng15/.gcloud/keyfile.json
+
+plugins:
+  - serverless-google-cloudfunctions
+functions:
+  resize:
+    handler: resizeImage
+    memorySize: 256
+    timeout: 20s
+    events:
+      - event:
+          eventType: google.storage.object.finalize
+          resource: 'projects/${self:provider.project, ""}/buckets/kyo-demo'

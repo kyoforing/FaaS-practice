@@ -6,6 +6,7 @@ using DemoAPI.Models;
 using DemoAPI.Resolver;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using TrexDino.Extensions;
 
 namespace DemoAPI.Controllers
 {
@@ -27,9 +28,9 @@ namespace DemoAPI.Controllers
         }
 
         [HttpPost("api/v1/image"), DisableRequestSizeLimit]
-        public async Task<IActionResult> UploadImage(IFormFile file)
+        public async Task<IActionResult> UploadImage(IFormFile file, string provider)
         {
-            await _providerResolver(Provider.AWS).UploadImage(file);
+            await _providerResolver(provider.ToEnumIgnoreCase<Provider>()).UploadImage(file);
             return Ok();
         }
     }

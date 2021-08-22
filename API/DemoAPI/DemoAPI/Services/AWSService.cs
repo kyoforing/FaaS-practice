@@ -7,6 +7,7 @@ using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.SimpleEmail;
 using Amazon.SimpleEmail.Model;
+using DemoAPI.Helpers;
 using DemoAPI.Models;
 using Microsoft.AspNetCore.Http;
 
@@ -14,6 +15,13 @@ namespace DemoAPI.Services
 {
     public class AWSService : IProvider
     {
+        private readonly IFileHandler _fileHandler;
+
+        public AWSService(IFileHandler fileHandler)
+        {
+            _fileHandler = fileHandler;
+        }
+
         public async Task SendMail(Mail mail)
         {
             using var client = new AmazonSimpleEmailServiceClient(RegionEndpoint.APNortheast1);
@@ -43,7 +51,7 @@ namespace DemoAPI.Services
 
         public async Task UploadImage(IFormFile file)
         {
-            var (fileName, filePath) = await GetFilePath(file);
+            var (fileName, filePath) = await _fileHandler.GetFilePath(file);
 
             var objectRequest = new PutObjectRequest
             {
@@ -54,22 +62,6 @@ namespace DemoAPI.Services
             };
             var s3Client = new AmazonS3Client(RegionEndpoint.APNortheast1);
             await s3Client.PutObjectAsync(objectRequest);
-        }
-
-        private async Task<(string, string)> GetFilePath(IFormFile file)
-        {
-            var folderName = Path.Combine("Resources", "Images");
-            var pathToSave = Path.Combine(Directory.GetCurrentDirectory(), folderName);
-            var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName?.Trim('"');
-            var filePath = Path.Combine(pathToSave, fileName!);
-
-            if (file.Length > 0)
-            {
-                await using var stream = new FileStream(filePath, FileMode.Create);
-                await file.CopyToAsync(stream);
-            }
-
-            return (fileName, filePath);
         }
     }
 }

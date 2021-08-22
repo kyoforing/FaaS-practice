@@ -4,12 +4,14 @@ using System.Net.Mail;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using DemoAPI.Helpers;
 using DemoAPI.Models;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Gmail.v1;
 using Google.Apis.Gmail.v1.Data;
 using Google.Apis.Services;
 using Google.Apis.Util.Store;
+using Google.Cloud.Storage.V1;
 using Microsoft.AspNetCore.Http;
 using static Google.Apis.Auth.OAuth2.GoogleWebAuthorizationBroker;
 
@@ -17,6 +19,13 @@ namespace DemoAPI.Services
 {
     public class GCPService : IProvider
     {
+        private readonly IFileHandler _fileHandler;
+
+        public GCPService(IFileHandler fileHandler)
+        {
+            _fileHandler = fileHandler;
+        }
+
         public async Task SendMail(Mail mail)
         {
             var service = new GmailService(await GoogleOAuthInitializer());
@@ -40,9 +49,13 @@ namespace DemoAPI.Services
             await service.Users.Messages.Send(newMsg, "me").ExecuteAsync();
         }
 
-        public Task UploadImage(IFormFile image)
+        public async Task UploadImage(IFormFile file)
         {
-            throw new NotImplementedException();
+            var (fileName, filePath) = await _fileHandler.GetFilePath(file);
+            var googleCredential = GoogleCredential.FromFile("Properties/storage-secret.json").CreateScoped("https://www.googleapis.com/auth/cloud-platform");
+            var storage = await StorageClient.CreateAsync(googleCredential);
+            await using var fileStream = File.OpenRead(filePath);
+            storage.UploadObject("kyo-demo", fileName, null, fileStream);
         }
 
         public static string Base64UrlEncode(string input)

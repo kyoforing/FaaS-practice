@@ -342,3 +342,4 @@ API/DemoAPI/DemoAPI/Resources/Images/
 API/DemoAPI/DemoAPI/Properties/client_secret.json
 API/DemoAPI/DemoAPI/Properties/token.json/
 FaaS/*/.serverless/
+FaaS/*/package-lock.json
