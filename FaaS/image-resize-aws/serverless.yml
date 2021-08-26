@@ -12,3 +12,7 @@ functions:
     handler: handler.resizeImage
     memorySize: 512
     timeout: 30
+    events:
+      - s3:
+          bucket: kyo1-demo
+          event: s3:ObjectCreated:*

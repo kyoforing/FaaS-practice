@@ -2,6 +2,9 @@
   "main": "./index.js",
   "dependencies": {
     "@google-cloud/storage": "1.7.0",
-    "sharp": "0.28.3"
+    "sharp": "^0.28.3"
+  },
+  "devDependencies": {
+    "serverless-google-cloudfunctions": "^4.3.0"
   }
 }
