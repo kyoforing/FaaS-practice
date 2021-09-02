@@ -11,6 +11,7 @@ namespace DemoAPI.Services
     {
         Task SendMail(Mail mail);
         Task UploadImage(IFormFile image);
-        Task<HttpResponseMessage> GetEncryptPayload(AkontoWithdrawPayload akontoWithdrawPayload);
+        Task<string> GetEncryptPayload(AkontoWithdrawEncryptPayload akontoWithdrawEncryptPayload);
+        Task<string> GetDecryptPayload(AkontoWithdrawDecryptPayload akontoWithdrawDecryptPayload);
     }
 }

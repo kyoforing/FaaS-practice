@@ -65,23 +65,41 @@ namespace DemoAPI.Services
             storage.UploadObject("kyo-demo", fileName, null, fileStream);
         }
 
-        public async Task<HttpResponseMessage> GetEncryptPayload(AkontoWithdrawPayload akontoWithdrawPayload)
+        public async Task<string> GetEncryptPayload(AkontoWithdrawEncryptPayload akontoWithdrawEncryptPayload)
         {
-            var functionUrl = "https://asia-east1-helpful-kingdom-308211.cloudfunctions.net/helloworld";
+            var functionUrl = "https://asia-east1-helpful-kingdom-308211.cloudfunctions.net/akonto-withdraw-encrypt-payload";
+            var requestBody = JsonConvert.SerializeObject(akontoWithdrawEncryptPayload);
+            var token = await GetJwtToken(functionUrl);
 
-            var oidcToken = await GoogleCredential
-                .FromFile("Properties/cloud-storage.json")
-                .GetOidcTokenAsync(OidcTokenOptions.FromTargetAudience(functionUrl));
-            var token = await oidcToken.GetAccessTokenAsync();
-            var serializeObject = JsonConvert.SerializeObject(akontoWithdrawPayload);
+            return await ReadAsStringAsync(token, requestBody, functionUrl);
+        }
 
-            using var client = new HttpClient();
+        public async Task<string> GetDecryptPayload(AkontoWithdrawDecryptPayload akontoWithdrawDecryptPayload)
+        {
+            var functionUrl = "https://asia-east1-helpful-kingdom-308211.cloudfunctions.net/akonto-withdraw-decrypt-payload";
+            var requestBody = JsonConvert.SerializeObject(akontoWithdrawDecryptPayload);
+            var token = await GetJwtToken(functionUrl);
+
+            return await ReadAsStringAsync(token, requestBody, functionUrl);
+        }
+
+        private static async Task<string> ReadAsStringAsync(string token, string serializeObject, string functionUrl)
+        {
+            var client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var requestContent = new StringContent(serializeObject, Encoding.UTF8, "application/json");
             var httpResponseMessage = await client.PostAsync(functionUrl, requestContent);
             var readAsStringAsync = await httpResponseMessage.Content.ReadAsStringAsync();
+            return readAsStringAsync;
+        }
 
-            return httpResponseMessage;
+        private static async Task<string> GetJwtToken(string functionUrl)
+        {
+            var oidcToken = await GoogleCredential
+                .FromFile("Properties/cloud-storage.json")
+                .GetOidcTokenAsync(OidcTokenOptions.FromTargetAudience(functionUrl));
+
+            return await oidcToken.GetAccessTokenAsync();
         }
 
         public static string Base64UrlEncode(string input)

@@ -36,17 +36,33 @@ namespace DemoAPI.Controllers
         }
 
         [HttpPost("api/v1/encrypt-payload")]
-        public async Task<IActionResult> EncryptPayload(AkontoWithdrawPayload akontoWithdrawPayload)
+        public async Task<IActionResult> EncryptPayload(AkontoWithdrawEncryptPayload akontoWithdrawEncryptPayload)
         {
-            await _providerResolver("GCP".ToEnumIgnoreCase<Provider>())
-                .GetEncryptPayload(akontoWithdrawPayload);
-            return Ok();
+            var encryptPayload = await _providerResolver("GCP".ToEnumIgnoreCase<Provider>())
+                .GetEncryptPayload(akontoWithdrawEncryptPayload);
+
+            return Ok(encryptPayload);
+        }
+
+        [HttpPost("api/v1/decrypt-payload")]
+        public async Task<IActionResult> DecryptPayload(AkontoWithdrawDecryptPayload akontoWithdrawDecryptPayload)
+        {
+            var decryptPayload = await _providerResolver("GCP".ToEnumIgnoreCase<Provider>())
+                .GetDecryptPayload(akontoWithdrawDecryptPayload);
+
+            return Ok(decryptPayload);
         }
     }
 
-    public class AkontoWithdrawPayload
+    public class AkontoWithdrawEncryptPayload
     {
         public string Payload { get; set; }
         public string EncryptKey { get; set; }
+    }
+
+    public class AkontoWithdrawDecryptPayload
+    {
+        public string EncryptPayload { get; set; }
+        public string DecryptKey { get; set; }
     }
 }

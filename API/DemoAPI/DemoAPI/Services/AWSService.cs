@@ -67,7 +67,12 @@ namespace DemoAPI.Services
             await s3Client.PutObjectAsync(objectRequest);
         }
 
-        public Task<HttpResponseMessage> GetEncryptPayload(AkontoWithdrawPayload akontoWithdrawPayload)
+        public Task<string> GetEncryptPayload(AkontoWithdrawEncryptPayload akontoWithdrawEncryptPayload)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task<string> GetDecryptPayload(AkontoWithdrawDecryptPayload akontoWithdrawDecryptPayload)
         {
             throw new System.NotImplementedException();
         }
