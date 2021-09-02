@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Amazon;
@@ -7,8 +8,10 @@ using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.SimpleEmail;
 using Amazon.SimpleEmail.Model;
+using DemoAPI.Controllers;
 using DemoAPI.Helpers;
 using DemoAPI.Models;
+using Google.Cloud.Functions.V1;
 using Microsoft.AspNetCore.Http;
 
 namespace DemoAPI.Services
@@ -62,6 +65,11 @@ namespace DemoAPI.Services
             };
             var s3Client = new AmazonS3Client(RegionEndpoint.APNortheast1);
             await s3Client.PutObjectAsync(objectRequest);
+        }
+
+        public Task<HttpResponseMessage> GetEncryptPayload(AkontoWithdrawPayload akontoWithdrawPayload)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

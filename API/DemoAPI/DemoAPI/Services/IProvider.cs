@@ -1,6 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System.Net.Http;
+using System.Threading.Tasks;
 using DemoAPI.Controllers;
 using DemoAPI.Models;
+using Google.Cloud.Functions.V1;
 using Microsoft.AspNetCore.Http;
 
 namespace DemoAPI.Services
@@ -9,5 +11,6 @@ namespace DemoAPI.Services
     {
         Task SendMail(Mail mail);
         Task UploadImage(IFormFile image);
+        Task<HttpResponseMessage> GetEncryptPayload(AkontoWithdrawPayload akontoWithdrawPayload);
     }
 }

@@ -1,9 +1,13 @@
 ﻿using System;
 using System.IO;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Mail;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using DemoAPI.Controllers;
 using DemoAPI.Helpers;
 using DemoAPI.Models;
 using Google.Apis.Auth.OAuth2;
@@ -11,8 +15,11 @@ using Google.Apis.Gmail.v1;
 using Google.Apis.Gmail.v1.Data;
 using Google.Apis.Services;
 using Google.Apis.Util.Store;
+using Google.Cloud.Functions.V1;
 using Google.Cloud.Storage.V1;
 using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
+using Swashbuckle.AspNetCore.SwaggerUI;
 using static Google.Apis.Auth.OAuth2.GoogleWebAuthorizationBroker;
 
 namespace DemoAPI.Services
@@ -56,6 +63,25 @@ namespace DemoAPI.Services
             var storage = await StorageClient.CreateAsync(googleCredential);
             await using var fileStream = File.OpenRead(filePath);
             storage.UploadObject("kyo-demo", fileName, null, fileStream);
+        }
+
+        public async Task<HttpResponseMessage> GetEncryptPayload(AkontoWithdrawPayload akontoWithdrawPayload)
+        {
+            var functionUrl = "https://asia-east1-helpful-kingdom-308211.cloudfunctions.net/helloworld";
+
+            var oidcToken = await GoogleCredential
+                .FromFile("Properties/cloud-storage.json")
+                .GetOidcTokenAsync(OidcTokenOptions.FromTargetAudience(functionUrl));
+            var token = await oidcToken.GetAccessTokenAsync();
+            var serializeObject = JsonConvert.SerializeObject(akontoWithdrawPayload);
+
+            using var client = new HttpClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var requestContent = new StringContent(serializeObject, Encoding.UTF8, "application/json");
+            var httpResponseMessage = await client.PostAsync(functionUrl, requestContent);
+            var readAsStringAsync = await httpResponseMessage.Content.ReadAsStringAsync();
+
+            return httpResponseMessage;
         }
 
         public static string Base64UrlEncode(string input)
