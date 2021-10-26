@@ -14,5 +14,5 @@ functions:
     timeout: 30
     events:
       - s3:
-          bucket: kyo1-demo
+          bucket: kyo-demo
           event: s3:ObjectCreated:*

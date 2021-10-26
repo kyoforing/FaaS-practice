@@ -5,7 +5,7 @@ provider:
   name: google
   runtime: nodejs14
   region: asia-east2
-  project: fifth-audio-321904
+  project: xxx
   credentials: C:/Users/kyo.cheng15/.gcloud/keyfile.json
 
 plugins:

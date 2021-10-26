@@ -1,0 +1,8 @@
+{
+  "name": "greeting",
+  "description": "",
+  "version": "0.1.0",
+  "dependencies": {
+    "jest": "^27.3.1"
+  }
+}

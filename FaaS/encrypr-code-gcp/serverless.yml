@@ -1,9 +1,9 @@
-service: kg
+service: encrypt
 frameworkVersion: '2'
 
 provider:
   name: google
-  runtime: nodejs14
+  runtime: php74
   region: asia-east2
   project: xxx
   credentials: C:/Users/kyo.cheng15/.gcloud/keyfile.json
@@ -11,9 +11,9 @@ provider:
 plugins:
   - serverless-google-cloudfunctions
 functions:
-  search:
-    handler: kgSearch
+  code:
+    handler: get_encrypt_code
     memorySize: 128
     timeout: 20s
     events:
-      - http: slack
+      - http: encrypt-code

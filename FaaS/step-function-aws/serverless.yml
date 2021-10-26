@@ -1,0 +1,105 @@
+service: state-machine
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: ap-northeast-1
+  stage: dev
+  lambdaHashingVersion: 20201221
+  environment:
+    awsAccount: xxx
+    STEP_FUNCTION_ARN: "arn:aws:states:${self:provider.region}:${self:provider.environment.awsAccount}:stateMachine:${self:service}-${self:provider.stage}-lambdaStateMachine"
+    FIRST_FUNCTION_ARN: "arn:aws:lambda:${self:provider.region}:${self:provider.environment.awsAccount}:function:${self:service}-${self:provider.stage}-stateMachineFirstStep"
+    CHOICE_FUNCTION_ARN: "arn:aws:lambda:${self:provider.region}:${self:provider.environment.awsAccount}:function:${self:service}-${self:provider.stage}-stateMachineChoiceStep"
+    END_FUNCTION_ARN: "arn:aws:lambda:${self:provider.region}:${self:provider.environment.awsAccount}:function:${self:service}-${self:provider.stage}-stateMachineEndStep"
+functions:
+  stateMachineFirstStep:
+    handler: handler.firstStep
+  stateMachineChoiceStep:
+    handler: handler.choiceStep
+  stateMachineEndStep:
+    handler: handler.endStep
+
+# define the state machine
+stepFunctions:
+  stateMachines:
+    TechDay:     
+      definition:
+        StartAt: Start-Func
+        States:
+          Start-Func:
+            Type: Task
+            Resource: "${self:provider.environment.FIRST_FUNCTION_ARN}"
+            Next: Next-Func
+          Next-Func:
+            Type: Task
+            Resource: "${self:provider.environment.CHOICE_FUNCTION_ARN}"
+            Next: Choices-Func
+          Choices-Func:
+            Type: Choice
+            Choices:
+            - Variable: "$.randomNumber"
+              NumericEquals: 0
+              Next: Start-Func
+            - Variable: "$.randomNumber"
+              NumericEquals: 1
+              Next: End-Func
+          End-Func:
+            Type: Task
+            Resource: "${self:provider.environment.END_FUNCTION_ARN}"
+            End: True
+
+# define the IAM permissions of our Lambda functions
+resources:
+  Resources:
+    stateMachine:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: stateMachine
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: stateMachine
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: "Allow"
+                  Action:
+                    - "states:StartExecution"
+                  Resource: "${self:provider.environment.STEP_FUNCTION_ARN}"
+    specificFunction:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: specificFunction
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: specificFunction
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: "Allow"
+                  Action:
+                    - "lambda:InvokeFunction"
+                  Resource: "${self:provider.environment.FIRST_FUNCTION_ARN}"
+
+package:
+  exclude:
+    - node_modules/**
+    - .serverless/**
+
+plugins:
+  - serverless-step-functions

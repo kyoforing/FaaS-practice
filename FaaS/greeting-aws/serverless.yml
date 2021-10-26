@@ -1,0 +1,16 @@
+service: serverless-simple-http-endpoint
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: ap-northeast-1
+  lambdaHashingVersion: 20201221
+
+functions:
+  greeting:
+    handler: handler.endpoint
+    events:
+      - httpApi:
+          path: /message
+          method: get
