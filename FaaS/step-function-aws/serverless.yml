@@ -3,7 +3,8 @@ frameworkVersion: '2'
 
 provider:
   name: aws
-  runtime: nodejs12.x
+  runtime: nodejs14.x
+  architecture: arm64
   region: ap-northeast-1
   stage: dev
   lambdaHashingVersion: 20201221
@@ -15,13 +16,21 @@ provider:
     END_FUNCTION_ARN: "arn:aws:lambda:${self:provider.region}:${self:provider.environment.awsAccount}:function:${self:service}-${self:provider.stage}-stateMachineEndStep"
 functions:
   startStateMachine:
-    handler: handler.startExecution  
+    handler: handler.startExecution
+    memorySize: 128
+    timeout: 20
   stateMachineFirstStep:
     handler: handler.firstStep
+    memorySize: 128
+    timeout: 20
   stateMachineChoiceStep:
     handler: handler.choiceStep
+    memorySize: 128
+    timeout: 20
   stateMachineEndStep:
     handler: handler.endStep
+    memorySize: 128
+    timeout: 20
 
 # define the state machine
 stepFunctions:
