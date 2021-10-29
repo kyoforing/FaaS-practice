@@ -2,14 +2,21 @@
 const AWS = require('aws-sdk');
 const stepfunctions = new AWS.StepFunctions();
 
-module.exports.firstStep = async event => {
+module.exports.startExecution = async event => {
   const params = {
     stateMachineArn: process.env.STEP_FUNCTION_ARN,
-    input: {}
+    input: JSON.stringify(event)
   };
 
-  await stepfunctions.startExecution(params);
+  await stepfunctions.startExecution(params).promise();
 
+  console.log('start execution')
+  console.log(event);
+
+  return event;
+};
+
+module.exports.firstStep = async event => {
   console.log('first step')
   console.log(event);
 

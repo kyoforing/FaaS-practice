@@ -9,11 +9,13 @@ provider:
   lambdaHashingVersion: 20201221
   environment:
     awsAccount: xxx
-    STEP_FUNCTION_ARN: "arn:aws:states:${self:provider.region}:${self:provider.environment.awsAccount}:stateMachine:${self:service}-${self:provider.stage}-lambdaStateMachine"
+    STEP_FUNCTION_ARN: "arn:aws:states:${self:provider.region}:${self:provider.environment.awsAccount}:stateMachine:TechDayStepFunctionsStateMachine-xxx"
     FIRST_FUNCTION_ARN: "arn:aws:lambda:${self:provider.region}:${self:provider.environment.awsAccount}:function:${self:service}-${self:provider.stage}-stateMachineFirstStep"
     CHOICE_FUNCTION_ARN: "arn:aws:lambda:${self:provider.region}:${self:provider.environment.awsAccount}:function:${self:service}-${self:provider.stage}-stateMachineChoiceStep"
     END_FUNCTION_ARN: "arn:aws:lambda:${self:provider.region}:${self:provider.environment.awsAccount}:function:${self:service}-${self:provider.stage}-stateMachineEndStep"
 functions:
+  startStateMachine:
+    handler: handler.startExecution  
   stateMachineFirstStep:
     handler: handler.firstStep
   stateMachineChoiceStep:
@@ -49,52 +51,6 @@ stepFunctions:
             Type: Task
             Resource: "${self:provider.environment.END_FUNCTION_ARN}"
             End: True
-
-# define the IAM permissions of our Lambda functions
-resources:
-  Resources:
-    stateMachine:
-      Type: AWS::IAM::Role
-      Properties:
-        RoleName: stateMachine
-        AssumeRolePolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Principal:
-                Service:
-                  - lambda.amazonaws.com
-              Action: sts:AssumeRole
-        Policies:
-          - PolicyName: stateMachine
-            PolicyDocument:
-              Version: '2012-10-17'
-              Statement:
-                - Effect: "Allow"
-                  Action:
-                    - "states:StartExecution"
-                  Resource: "${self:provider.environment.STEP_FUNCTION_ARN}"
-    specificFunction:
-      Type: AWS::IAM::Role
-      Properties:
-        RoleName: specificFunction
-        AssumeRolePolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Principal:
-                Service:
-                  - lambda.amazonaws.com
-              Action: sts:AssumeRole
-        Policies:
-          - PolicyName: specificFunction
-            PolicyDocument:
-              Version: '2012-10-17'
-              Statement:
-                - Effect: "Allow"
-                  Action:
-                    - "lambda:InvokeFunction"
-                  Resource: "${self:provider.environment.FIRST_FUNCTION_ARN}"
 
 package:
   exclude:
